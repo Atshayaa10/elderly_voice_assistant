@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Voice Assistant - Chat</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-icon {
+            font-size: 1.5em;
+            color: #667eea;
+        }
+
+        .header-text h1 {
+            color: #333;
+            font-size: 1.5em;
+            font-weight: 600;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-link {
+            padding: 8px 16px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 0.9em;
+        }
+
+        .nav-link:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            width: 100%;
+        }
+
+        .language-selector {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .language-selector h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .language-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .lang-btn {
+            padding: 8px 16px;
+            border: 2px solid #667eea;
+            background: transparent;
+            color: #667eea;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .lang-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .lang-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .chat-messages {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+            max-height: 400px;
+            min-height: 300px;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .message.user .message-avatar {
+            background: #667eea;
+        }
+
+        .message.assistant .message-avatar {
+            background: #28a745;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            position: relative;
+        }
+
+        .message.user .message-content {
+            background: #667eea;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.assistant .message-content {
+            background: #f8f9fa;
+            color: #333;
+            border: 1px solid #e9ecef;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message-time {
+            font-size: 0.75em;
+            opacity: 0.7;
+            margin-top: 5px;
+        }
+
+        .message-actions {
+            display: flex;
+            gap: 5px;
+            margin-top: 8px;
+        }
+
+        .message-action {
+            background: none;
+            border: none;
+            color: #667eea;
+            cursor: pointer;
+            font-size: 0.9em;
+            padding: 4px 8px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .message-action:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .chat-input-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .voice-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .voice-btn {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: none;
+            font-size: 2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .voice-btn.record {
+            background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+            color: white;
+        }
+
+        .voice-btn.record:hover {
+            transform: scale(1.1);
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+        }
+
+        .voice-btn.record.recording {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.7);
+            }
+            70% {
+                transform: scale(1.1);
+                box-shadow: 0 0 0 10px rgba(255, 107, 107, 0);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(255, 107, 107, 0);
+            }
+        }
+
+        .voice-btn.stop {
+            background: linear-gradient(45deg, #ffc107, #ffdd57);
+            color: #333;
+        }
+
+        .voice-btn.stop:hover {
+            transform: scale(1.1);
+            box-shadow: 0 10px 30px rgba(255, 193, 7, 0.4);
+        }
+
+        .text-input-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .text-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 1em;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .text-input:focus {
+            border-color: #667eea;
+        }
+
+        .send-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            background: #667eea;
+            color: white;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .send-btn:hover {
+            background: #5a67d8;
+            transform: scale(1.1);
+        }
+
+        .recording-indicator {
+            text-align: center;
+            margin-bottom: 15px;
+            color: #666;
+        }
+
+        .recording-indicator.active {
+            color: #ff6b6b;
+            font-weight: 600;
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .quick-action {
+            padding: 8px 16px;
+            background: rgba(102, 126, 234, 0.1);
+            border: 1px solid #667eea;
+            border-radius: 20px;
+            color: #667eea;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+        }
+
+        .quick-action:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .emergency-btn {
+            background: linear-gradient(45deg, #dc3545, #ff4757);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+        }
+
+        .emergency-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(220, 53, 69, 0.4);
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #28a745;
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
+        }
+
+        .welcome-message {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .language-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .voice-controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .voice-btn {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5em;
+            }
+
+            .message-content {
+                max-width: 85%;
+            }
+
+            .quick-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="header-title">
+                <i class="fas fa-robot header-icon"></i>
+                <div class="header-text">
+                    <h1>AI Voice Assistant</h1>
+                </div>
+            </div>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">
+                    <i class="fas fa-home"></i> Home
+                </a>
+                <a href="dashboard.html" class="nav-link">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+                <a href="reminders.html" class="nav-link">
+                    <i class="fas fa-bell"></i> Reminders
+                </a>
+                <a href="emergency.html" class="nav-link">
+                    <i class="fas fa-exclamation-triangle"></i> Emergency
+                </a>
+                <a href="settings.html" class="nav-link">
+                    <i class="fas fa-cog"></i> Settings
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="chat-container">
+        <div class="language-selector">
+            <h3>Choose Your Language / மொழியை தேர்ந்தெடுக்கவும் / भाषा चुनें</h3>
+            <div class="language-buttons">
+                <button class="lang-btn active" data-lang="en">
+                    <i class="fas fa-flag-usa"></i> English
+                </button>
+                <button class="lang-btn" data-lang="ta">
+                    <i class="fas fa-flag"></i> தமிழ்
+                </button>
+                <button class="lang-btn" data-lang="hi">
+                    <i class="fas fa-flag"></i> हिंदी
+                </button>
+            </div>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+            <div class="welcome-message">
+                <p><i class="fas fa-heart"></i> Welcome! I'm here to help you with health questions, medicine reminders, and emergencies. You can speak to me in English, Tamil, or Hindi.</p>
+            </div>
+        </div>
+
+        <div class="chat-input-container">
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                <span>Assistant is ready</span>
+            </div>
+
+            <div class="quick-actions">
+                <button class="quick-action" onclick="sendQuickMessage('medicine reminder')">
+                    <i class="fas fa-pills"></i> Medicine Reminder
+                </button>
+                <button class="quick-action" onclick="sendQuickMessage('health check')">
+                    <i class="fas fa-heartbeat"></i> Health Check
+                </button>
+                <button class="quick-action" onclick="sendQuickMessage('doctor appointment')">
+                    <i class="fas fa-user-md"></i> Doctor Appointment
+                </button>
+                <button class="quick-action" onclick="sendQuickMessage('symptom checker')">
+                    <i class="fas fa-stethoscope"></i> Symptom Checker
+                </button>
+            </div>
+
+            <div class="recording-indicator" id="recordingIndicator">
+                <i class="fas fa-microphone"></i> Click the red button to start speaking
+            </div>
+
+            <div class="voice-controls">
+                <button class="voice-btn record" id="recordBtn" onclick="toggleRecording()">
+                    <i class="fas fa-microphone"></i>
+                </button>
+                <button class="voice-btn stop" id="stopBtn" onclick="stopRecording()" style="display: none;">
+                    <i class="fas fa-stop"></i>
+                </button>
+            </div>
+
+            <div class="text-input-container">
+                <input type="text" class="text-input" id="textInput" placeholder="Type your message here..." onkeypress="handleKeyPress(event)">
+                <button class="send-btn" onclick="sendMessage()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+
+            <button class="emergency-btn" onclick="triggerEmergency()">
+                <i class="fas fa-ambulance"></i> EMERGENCY HELP
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let isRecording = false;
+        let currentLanguage = 'en';
+        let mediaRecorder;
+        let audioChunks = [];
+
+        // Language selection
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentLanguage = this.dataset.lang;
+                updateLanguageTexts();
+            });
+        });
+
+        // Update UI texts based on language
+        function updateLanguageTexts() {
+            const texts = {
+                en: {
+                    status: "Assistant is ready",
+                    placeholder: "Type your message here...",
+                    recording: "Recording... Speak now",
+                    clickToRecord: "Click the red button to start speaking"
+                },
+                ta: {
+                    status: "உதவியாளர் தயார்",
+                    placeholder: "உங்கள் செய்தியை இங்கே தட்டச்சு செய்யுங்கள்...",
+                    recording: "பதிவு செய்கிறது... இப்போது பேசுங்கள்",
+                    clickToRecord: "பேசத் தொடங்க சிவப்பு பொத்தானை கிளிக் செய்யுங்கள்"
+                },
+                hi: {
+                    status: "सहायक तैयार है",
+                    placeholder: "यहाँ अपना संदेश टाइप करें...",
+                    recording: "रिकॉर्डिंग... अब बोलें",
+                    clickToRecord: "बोलना शुरू करने के लिए लाल बटन पर क्लिक करें"
+                }
+            };
+
+            const currentTexts = texts[currentLanguage];
+            document.querySelector('.status-indicator span').textContent = currentTexts.status;
+            document.getElementById('textInput').placeholder = currentTexts.placeholder;
+            
+            if (!isRecording) {
+                document.getElementById('recordingIndicator').innerHTML = 
+                    `<i class="fas fa-microphone"></i> ${currentTexts.clickToRecord}`;
+            }
+        }
+
+        // Voice recording
+        async function toggleRecording() {
+            if (!isRecording) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    
+                    mediaRecorder.ondataavailable = (event) => {
+                        audioChunks.push(event.data);
+                    };
+                    
+                    mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                        processAudioRecording(audioBlob);
+                        audioChunks = [];
+                    };
+                    
+                    mediaRecorder.start();
+                    startRecording();
+                } catch (error) {
+                    console.error('Error accessing microphone:', error);
+                    alert('Unable to access microphone. Please check permissions.');
+                }
+            } else {
+                stopRecording();
+            }
+        }
+
+        function startRecording() {
+            isRecording = true;
+            document.getElementById('recordBtn').classList.add('recording');
+            document.getElementById('stopBtn').style.display = 'block';
+            document.getElementById('recordingIndicator').innerHTML = 
+                `<i class="fas fa-microphone"></i> Recording... Speak now`;
+            document.getElementById('recordingIndicator').classList.add('active');
+        }
+
+        function stopRecording() {
+            isRecording = false;
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+                mediaRecorder.stream.getTracks().forEach(track => track.stop());
+            }
+            
+            document.getElementById('recordBtn').classList.remove('recording');
+            document.getElementById('stopBtn').style.display = 'none';
+            document.getElementById('recordingIndicator').classList.remove('active');
+            updateLanguageTexts();
+        }
+
+        function processAudioRecording(audioBlob) {
+            // Create a message bubble for the audio
+            addMessage('user', 'Voice message recorded', true);
+            
+            // Here you would send the audio to your Flask backend
+            const formData = new FormData();
+            formData.append('audio', audioBlob, 'recording.wav');
+            formData.append('language', currentLanguage);
+            
+            // Simulate processing
+            setTimeout(() => {
+                addMessage('assistant', 'I heard you clearly! Processing your request...');
+                
+                // Simulate AI response
+                setTimeout(() => {
+                    const responses = {
+                        en: "I understand you're asking about your health. How can I help you today?",
+                        ta: "உங்கள் உடல்நலத்தைப் பற்றி கேட்கிறீர்கள் என்பதை புரிந்துகொள்கிறேன். இன்று நான் உங்களுக்கு எப்படி உதவ முடியும்?",
+                        hi: "मैं समझता हूं कि आप अपने स्वास्थ्य के बारे में पूछ रहे हैं। आज मैं आपकी कैसे सहायता कर सकता हूं?"
+                    };
+                    addMessage('assistant', responses[currentLanguage]);
+                }, 1500);
+            }, 1000);
+        }
+
+        // Text messaging
+        function sendMessage() {
+            const input = document.getElementById('textInput');
+            const message = input.value.trim();
+            
+            if (message) {
+                addMessage('user', message);
+                input.value = '';
+                
+                // Simulate AI response
+                setTimeout(() => {
+                    const responses = {
+                        en: "Thank you for your message. I'm processing your request and will provide helpful information shortly.",
+                        ta: "உங்கள் செய்திக்கு நன்றி. நான் உங்கள் கோரிக்கையை செயலாக்குகிறேன், விரைவில் பயனுள்ள தகவல்களை வழங்குவேன்.",
+                        hi: "आपके संदेश के लिए धन्यवाद। मैं आपकी अनुरोध को प्रसंस्करण कर रहा हूं और जल्द ही उपयोगी जानकारी प्रदान करूंगा।"
+                    };
+                    addMessage('assistant', responses[currentLanguage]);
+                }, 1000);
+            }
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        function sendQuickMessage(action) {
+            const messages = {
+                'medicine reminder': {
+                    en: "Please set up a medicine reminder for me",
+                    ta: "எனக்கு மருந்து நினைவூட்டல் அமைக்கவும்",
+                    hi: "कृपया मेरे लिए दवा रिमाइंडर सेट करें"
+                },
+                'health check': {
+                    en: "I want to check my health status",
+                    ta: "என் உடல்நலத்தை சரிபார்க்க விரும்புகிறேன்",
+                    hi: "मैं अपने स्वास्थ्य की जांच करना चाहता हूं"
+                },
+                'doctor appointment': {
+                    en: "Help me schedule a doctor appointment",
+                    ta: "மருத்துவர் சந்திப்பை நிர்ணயிக்க உதவுங்கள்",
+                    hi: "डॉक्टर की अपॉइंटमेंट शेड्यूल करने में मदद करें"
+                },
+                'symptom checker': {
+                    en: "I want to check my symptoms",
+                    ta: "என் அறிகுறிகளை சரிபார்க்க விரும்புகிறேன்",
+                    hi: "मैं अपने लक्षणों की जांच करना चाहता हूं"
+                }
+            };
+            
+            const message = messages[action][currentLanguage];
+            addMessage('user', message);
+            
+            // Simulate AI response
+            setTimeout(() => {
+                const responses = {
+                    'medicine reminder': {
+                        en: "I'll help you set up medicine reminders. What medication do you need reminders for?",
+                        ta: "மருந்து நினைவூட்டல்களை அமைக்க உதவுவேன். எந்த மருந்துக்கு நினைவூட்டல் தேவை?",
+                        hi: "मैं आपको दवा रिमाइंडर सेट करने में मदद करूंगा। आपको किस दवा के लिए रिमाइंडर चाहिए?"
+                    },
+                    'health check': {
+                        en: "Let's check your health. How are you feeling today? Any specific concerns?",
+                        ta: "உங்கள் உடல்நலத்தை சரிபார்ப்போம். இன்று எப்படி உணர்கிறீர்கள்? ஏதேனும் குறிப்பிட்ட கவலைகள்?",
+                        hi: "आइए आपके स्वास्थ्य की जांच करते हैं। आज आप कैसा महसूस कर रहे हैं? कोई विशिष्ट चिंता?"
+                    },
+                    'doctor appointment': {
+                        en: "I can help you schedule an appointment. What type of doctor do you need to see?",
+                        ta: "சந்திப்பு நிர்ணயிக்க உதவ முடியும். எந்த வகை மருத்துவரைப் பார்க்க வேண்டும்?",
+                        hi: "मैं आपको अपॉइंटमेंट शेड्यूल करने में मदद कर सकता हूं। आपको किस प्रकार के डॉक्टर से मिलना है?"
+                    },
+                    'symptom checker': {
+                        en: "I'll help you check your symptoms. Please describe what you're experiencing.",
+                        ta: "உங்கள் அறிகுறிகளை சரிபார்க்க உதவுவேன். நீங்கள் அனுபவிப்பதை விவரிக்கவும்.",
+                        hi: "मैं आपके लक्षणों की जांच करने में मदद करूंगा। कृपया बताएं कि आप क्या महसूस कर रहे हैं।"
+                    }
+                };
+                
+                addMessage('assistant', responses[action][currentLanguage]);
+            }, 1000);
+        }
+
+        function addMessage(sender, content, isVoice = false) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.innerHTML = sender === 'user' ? '<i class="fas fa-user"></i>' : '<i class="fas fa-robot"></i>';
+            
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            
+            if (isVoice) {
+                messageContent.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-microphone"></i>
+                        <span>${content}</span>
+                    </div>
+                `;
+            } else {
+                messageContent.textContent = content;
+            }
+            
+            const messageTime = document.createElement('div');
+            messageTime.className = 'message-time';
+            messageTime.textContent = new Date().toLocaleTimeString();
+            
+            messageContent.appendChild(messageTime);
+            
+            if (sender === 'assistant') {
+                const actions = document.createElement('div');
+                actions.className = 'message-actions';
+                actions.innerHTML = `
+                    <button class="message-action" onclick="speakMessage(this)">
+                        <i class="fas fa-volume-up"></i> Listen
+                    </button>
+                    <button class="message-action" onclick="copyMessage(this)">
+                        <i class="fas fa-copy"></i> Copy
+                    </button>
+                `;
+                messageContent.appendChild(actions);
+            }
+            
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(messageContent);
+            messagesContainer.appendChild(messageDiv);
+            
+            // Scroll to bottom
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function speakMessage(button) {
+            const messageContent = button.closest('.message-content');
+            const text = messageContent.textContent.replace(/Listen\s*Copy\s*\d+:\d+:\d+\s*[AP]M/g, '').trim();
+            
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = currentLanguage === 'ta' ? 'ta-IN' : 
+                                 currentLanguage === 'hi' ? 'hi-IN' : 'en-US';
+                speechSynthesis.speak(utterance);
+            } else {
+                alert('Speech synthesis not supported in this browser');
+            }
+        }
+
+        function copyMessage(button) {
+            const messageContent = button.closest('.message-content');
+            const text = messageContent.textContent.replace(/Listen\s*Copy\s*\d+:\d+:\d+\s*[AP]M/g, '').trim();
+            
+            navigator.clipboard.writeText(text).then(() => {
+                button.innerHTML = '<i class="fas fa-check"></i> Copied';
+                setTimeout(() => {
+                    button.innerHTML = '<i class="fas fa-copy"></i> Copy';
+                }, 2000);
+            });
+        }
+
+        function triggerEmergency() {
+            if (confirm('This will send an emergency alert to your emergency contacts. Continue?')) {
+                // Here you would trigger the emergency protocol
+                addMessage('user', 'EMERGENCY ALERT TRIGGERED');
+                
+                setTimeout(() => {
+                    addMessage('assistant', 'Emergency services have been notified. Help is on the way. Stay calm and follow the instructions I provide.');
+                }, 1000);
+            }
+        }
+
+        // Initialize
+        updateLanguageTexts();
+    </script>
+</body>
+</html>

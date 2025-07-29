@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Elderly Voice Assistant</title>
+  <script type="module" src="https://unpkg.com/@splinetool/viewer@1.10.33/build/spline-viewer.js"></script>
+  <style>
+    body {
+      margin: 0;
+      background-color: #0f0f20;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: white;
+      text-align: center;
+    }
+
+    spline-viewer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: -1;
+    }
+
+    .main-content {
+      position: relative;
+      z-index: 1;
+      padding-top: 180px;
+    }
+
+    h1 {
+      font-size: 32px;
+      margin-bottom: 20px;
+    }
+
+    button {
+      padding: 12px 30px;
+      font-size: 18px;
+      background-color: #6a0dad;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(106, 13, 173, 0.6);
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #8338ec;
+    }
+
+    #result {
+      margin-top: 30px;
+      font-size: 20px;
+      white-space: pre-line;
+      padding: 0 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <spline-viewer url="https://prod.spline.design/RqoFDATaAdsGVIZJ/scene.splinecode"></spline-viewer>
+
+  <div class="main-content">
+    <h1>👵 Welcome to Elderly Voice Assistant</h1>
+    <button onclick="startRecording()">🎙️ Speak Now</button>
+    <div id="result">Say something like “help”, “emergency”, or “save me”</div>
+  </div>
+
+  <script>
+    let recognition;
+    let isRecording = false;
+
+    function startRecording() {
+      if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+        alert("❌ Sorry, your browser doesn't support speech recognition.");
+        return;
+      }
+
+      if (isRecording) {
+        recognition.stop();
+        isRecording = false;
+        document.getElementById("result").innerText = "🎙️ Stopped listening.";
+        return;
+      }
+
+      recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = 'en-IN';
+      recognition.interimResults = false;
+      recognition.continuous = false;
+      isRecording = true;
+
+      document.getElementById("result").innerText = "🎧 Listening... Please speak clearly";
+
+      recognition.start();
+
+      recognition.onresult = function(event) {
+        const transcript = event.results[event.results.length - 1][0].transcript.trim();
+        document.getElementById("result").innerText = "🗣️ You said: " + transcript;
+
+        recognition.stop();
+        isRecording = false;
+
+        fetch('/voice_input', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ text: transcript })
+        })
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById("result").innerText += "\n🤖 Assistant: " + data.status;
+        })
+        .catch(error => {
+          console.error("Error sending voice input:", error);
+          document.getElementById("result").innerText += "\n❌ Error: " + error.message;
+        });
+      };
+
+      recognition.onerror = function(event) {
+        console.error("Speech recognition error:", event.error);
+        document.getElementById("result").innerText = "❌ Error: " + event.error;
+
+        if (["no-speech", "audio-capture"].includes(event.error)) {
+          document.getElementById("result").innerText += "\n🔁 Retrying...";
+          recognition.stop();
+          isRecording = false;
+          setTimeout(startRecording, 1000);
+        }
+      };
+
+      setTimeout(() => {
+        if (isRecording) {
+          recognition.stop();
+          isRecording = false;
+          document.getElementById("result").innerText = "⌛ Timeout. No speech detected.";
+        }
+      }, 10000);
+    }
+  </script>
+</body>
+</html>

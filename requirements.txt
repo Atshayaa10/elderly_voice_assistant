@@ -1,0 +1,10 @@
+flask
+transformers
+torch
+whisper
+langdetect
+twilio
+pyttsx3
+soundfile
+TTS
+schedule

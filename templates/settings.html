@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - AI Voice Assistant</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-icon {
+            font-size: 2em;
+            color: #667eea;
+        }
+
+        .header-text h1 {
+            color: #333;
+            font-size: 2em;
+            font-weight: 600;
+        }
+
+        .header-text p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .nav-link {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-link:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+
+        .settings-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .settings-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .settings-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .settings-icon {
+            font-size: 1.5em;
+            color: #667eea;
+        }
+
+        .settings-title {
+            font-size: 1.4em;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-control-group {
+            display: flex;
+            gap: 15px;
+        }
+
+        .form-control-group .form-control {
+            flex: 1;
+        }
+
+        .toggle-switch {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #667eea;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .language-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .language-option {
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .language-option:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .language-option.selected {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .language-flag {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .language-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .voice-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .voice-option {
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .voice-option:hover {
+            border-color: #667eea;
+        }
+
+        .voice-option.selected {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .voice-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .voice-details {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1em;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .volume-control {
+            margin-top: 10px;
+        }
+
+        .volume-slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: #e0e0e0;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+        }
+
+        .volume-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+        }
+
+        .notification-settings {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .notification-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .notification-info {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .notification-desc {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .nav-links {
+                justify-content: center;
+            }
+
+            .form-control-group {
+                flex-direction: column;
+            }
+
+            .language-selector {
+                grid-template-columns: 1fr;
+            }
+
+            .voice-options {
+                grid-template-columns: 1fr;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="header-title">
+                <div class="header-icon">
+                    <i class="fas fa-cog"></i>
+                </div>
+                <div class="header-text">
+                    <h1>Settings</h1>
+                    <p>Configure your AI voice assistant</p>
+                </div>
+            </div>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">
+                    <i class="fas fa-microphone-alt"></i> Voice Assistant
+                </a>
+                <a href="dashboard.html" class="nav-link">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+                <a href="reminders.html" class="nav-link">
+                    <i class="fas fa-bell"></i> Reminders
+                </a>
+                <a href="history.html" class="nav-link">
+                    <i class="fas fa-history"></i> History
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="settings-container">
+        <!-- Language Settings -->
+        <div class="settings-card">
+            <div class="settings-header">
+                <div class="settings-icon">
+                    <i class="fas fa-language"></i>
+                </div>
+                <div class="settings-title">Language Preferences</div>
+            </div>
+            <div class="form-group">
+                <label>Select your preferred language:</label>
+                <div class="language-selector">
+                    <div class="language-option selected" data-lang="en">
+                        <div class="language-flag">🇬🇧</div>
+                        <div class="language-name">English</div>
+                    </div>
+                    <div class="language-option" data-lang="hi">
+                        <div class="language-flag">🇮🇳</div>
+                        <div class="language-name">हिंदी</div>
+                    </div>
+                    <div class="language-option" data-lang="ta">
+                        <div class="language-flag">🇮🇳</div>
+                        <div class="language-name">தமிழ்</div>
+                    </div>
+                </div>
+            </div>
+            <div class="toggle-switch">
+                <label class="switch">
+                    <input type="checkbox" id="autoDetectLanguage" checked>
+                    <span class="slider"></span>
+                </label>
+                <span>Auto-detect language</span>
+            </div>
+        </div>
+
+        <!-- Voice Settings -->
+        <div class="settings-card">
+            <div class="settings-header">
+                <div class="settings-icon">
+                    <i class="fas fa-volume-up"></i>
+                </div>
+                <div class="settings-title">Voice Settings</div>
+            </div>
+            <div class="form-group">
+                <label>Choose voice type:</label>
+                <div class="voice-options">
+                    <div class="voice-option selected" data-voice="female">
+                        <div class="voice-name">Female Voice</div>
+                        <div class="voice-details">Clear, gentle tone</div>
+                    </div>
+                    <div class="voice-option" data-voice="male">
+                        <div class="voice-name">Male Voice</div>
+                        <div class="voice-details">Deep, authoritative tone</div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Speech Speed:</label>
+                <div class="volume-control">
+                    <input type="range" id="speechSpeed" class="volume-slider" min="0.5" max="2" step="0.1" value="1">
+                    <div style="display: flex; justify-content: space-between; margin-top: 5px; color: #666;">
+                        <span>Slow</span>
+                        <span>Normal</span>
+                        <span>Fast</span>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Volume:</label>
+                <div class="volume-control">
+                    <input type="range" id="volume" class="volume-slider" min="0" max="100" value="75">
+                    <div style="display: flex; justify-content: space-between; margin-top: 5px; color: #666;">
+                        <span>🔇</span>
+                        <span>🔉</span>
+                        <span>🔊</span>
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-primary" onclick="testVoice()">
+                <i class="fas fa-play"></i> Test Voice
+            </button>
+        </div>
+
+        <!-- Notification Settings -->
+        <div class="settings-card">
+            <div class="settings-header">
+                <div class="settings-icon">
+                    <i class="fas fa-bell"></i>
+                </div>
+                <div class="settings-title">Notification Settings</div>
+            </div>
+            <div class="notification-settings">
+                <div class="notification-item">
+                    <div class="notification-info">
+                        <div class="notification-title">Medicine Reminders</div>
+                        <div class="notification-desc">Get notified when it's time to take your medicine</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="medicineReminders" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="notification-item">
+                    <div class="notification-info">
+                        <div class="notification-title">Health Check Reminders</div>
+                        <div class="notification-desc">Regular reminders for health monitoring</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="healthReminders" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="notification-item">
+                    <div class="notification-info">
+                        <div class="notification-title">Emergency Alerts</div>
+                        <div class="notification-desc">Critical health alerts and emergency notifications</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="emergencyAlerts" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="notification-item">
+                    <div class="notification-info">
+                        <div class="notification-title">WhatsApp Notifications</div>
+                        <div class="notification-desc">Send alerts via WhatsApp to emergency contacts</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="whatsappNotifications" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Personal Information -->
+        <div class="settings-card">
+            <div class="settings-header">
+                <div class="settings-icon">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="settings-title">Personal Information</div>
+            </div>
+            <div class="form-group">
+                <label for="fullName">Full Name:</label>
+                <input type="text" id="fullName" class="form-control" placeholder="Enter your full name">
+            </div>
+            <div class="form-control-group">
+                <div class="form-group">
+                    <label for="age">Age:</label>
+                    <input type="number" id="age" class="form-control" placeholder="Age" min="1" max="120">
+                </div>
+                <div class="form-group">
+                    <label for="gender">Gender:</label>
+                    <select id="gender" class="form-control">
+                        <option value="">Select Gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="phoneNumber">Phone Number:</label>
+                <input type="tel" id="phoneNumber" class="form-control" placeholder="+91 9876543210">
+            </div>
+            <div class="form-group">
+                <label for="address">Address:</label>
+                <textarea id="address" class="form-control" rows="3" placeholder="Enter your address"></textarea>
+            </div>
+        </div>
+
+        <!-- Medical Information -->
+        <div class="settings-card">
+            <div class="settings-header">
+                <div class="settings-icon">
+                    <i class="fas fa-heartbeat"></i>
+                </div>
+                <div class="settings-title">Medical Information</div>
+            </div>
+            <div class="form-group">
+                <label for="bloodGroup">Blood Group:</label>
+                <select id="bloodGroup" class="form-control">
+                    <option value="">Select Blood Group</option>
+                    <option value="A+">A+</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B-">B-</option>
+                    <option value="AB+">AB+</option>
+                    <option value="AB-">AB-</option>
+                    <option value="O+">O+</option>
+                    <option value="O-">O-</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="allergies">Known Allergies:</label>
+                <textarea id="allergies" class="form-control" rows="3" placeholder="List any known allergies"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="medicalConditions">Medical Conditions:</label>
+                <textarea id="medicalConditions" class="form-control" rows="3" placeholder="List any chronic conditions"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="doctorContact">Primary Doctor Contact:</label>
+                <input type="tel" id="doctorContact" class="form-control" placeholder="Doctor's phone number">
+            </div>
+        </div>
+
+        <!-- Privacy Settings -->
+        <div class="settings-card">
+            <div class="settings-header">
+                <div class="settings-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <div class="settings-title">Privacy & Security</div>
+            </div>
+            <div class="notification-settings">
+                <div class="notification-item">
+                    <div class="notification-info">
+                        <div class="notification-title">Voice Recording Storage</div>
+                        <div class="notification-desc">Store voice recordings for improving accuracy</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="storeRecordings" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="notification-item">
+                    <div class="notification-info">
+                        <div class="notification-title">Data Analytics</div>
+                        <div class="notification-desc">Use anonymized data for service improvement</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="dataAnalytics" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="notification-item">
+                    <div class="notification-info">
+                        <div class="notification-title">Location Access</div>
+                        <div class="notification-desc">Allow location access for emergency services</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="locationAccess" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="settings-card">
+            <div class="btn-group">
+                <button class="btn btn-success" onclick="saveSettings()">
+                    <i class="fas fa-save"></i> Save Settings
+                </button>
+                <button class="btn btn-warning" onclick="resetSettings()">
+                    <i class="fas fa-undo"></i> Reset to Default
+                </button>
+                <button class="btn btn-danger" onclick="clearAllData()">
+                    <i class="fas fa-trash"></i> Clear All Data
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize settings
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSettings();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            // Language selection
+            document.querySelectorAll('.language-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    document.querySelectorAll('.language-option').forEach(opt => opt.classList.remove('selected'));
+                    this.classList.add('selected');
+                });
+            });
+
+            // Voice selection
+            document.querySelectorAll('.voice-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    document.querySelectorAll('.voice-option').forEach(opt => opt.classList.remove('selected'));
+                    this.classList.add('selected');
+                });
+            });
+
+            // Volume and speed sliders
+            document.getElementById('volume').addEventListener('input', function() {
+                console.log('Volume changed to:', this.value);
+            });
+
+            document.getElementById('speechSpeed').addEventListener('input', function() {
+                console.log('Speech speed changed to:', this.value);
+            });
+        }
+
+        function loadSettings() {
+            // Load saved settings from localStorage or server
+            const savedSettings = JSON.parse(localStorage.getItem('voiceAssistantSettings') || '{}');
+            
+            // Apply saved settings
+            if (savedSettings.fullName) document.getElementById('fullName').value = savedSettings.fullName;
+            if (savedSettings.age) document.getElementById('age').value = savedSettings.age;
+            if (savedSettings.gender) document.getElementById('gender').value = savedSettings.gender;
+            if (savedSettings.phoneNumber) document.getElementById('phoneNumber').value = savedSettings.phoneNumber;
+            if (savedSettings.address) document.getElementById('address').value = savedSettings.address;
+            if (savedSettings.bloodGroup) document.getElementById('bloodGroup').value = savedSettings.bloodGroup;
+            if (savedSettings.allergies) document.getElementById('allergies').value = savedSettings.allergies;
+            if (savedSettings.medicalConditions) document.getElementById('medicalConditions').value = savedSettings.medicalConditions;
+            if (savedSettings.doctorContact) document.getElementById('doctorContact').value = savedSettings.doctorContact;
+            
+            // Apply toggle settings
+            if (savedSettings.autoDetectLanguage !== undefined) {
+                document.getElementById('autoDetectLanguage').checked = savedSettings.autoDetectLanguage;
+            }
+            if (savedSettings.medicineReminders !== undefined) {
+                document.getElementById('medicineReminders').checked = savedSettings.medicineReminders;
+            }
+            if (savedSettings.healthReminders !== undefined) {
+                document.getElementById('healthReminders').checked = savedSettings.healthReminders;
+            }
+            if (savedSettings.emergencyAlerts !== undefined) {
+                document.getElementById('emergencyAlerts').checked = savedSettings.emergencyAlerts;
+            }
+            if (savedSettings.whatsappNotifications !== undefined) {
+                document.getElementById('whatsappNotifications').checked = savedSettings.whatsappNotifications;
+            }
+            if (savedSettings.storeRecordings !== undefined) {
+                document.getElementById('storeRecordings').checked = savedSettings.storeRecordings;
+            }
+            if (savedSettings.dataAnalytics !== undefined) {
+                document.getElementById('dataAnalytics').checked = savedSettings.dataAnalytics;
+            }
+            if (savedSettings.locationAccess !== undefined) {
+                document.getElementById('locationAccess').checked = savedSettings.locationAccess;
+            }
+        }
+
+        function saveSettings() {
+            const settings = {
+                fullName: document.getElementById('fullName').value,
+                age: document.getElementById('age').value,
+                gender: document.getElementById('gender').value,
+                phoneNumber: document.getElementById('phoneNumber').value,
+                address: document.getElementById('address').value,
+                bloodGroup: document.getElementById('bloodGroup').value,
+                allergies: document.getElementById('allergies').value,
+                medicalConditions: document.getElementById('medicalConditions').value,
+                doctorContact: document.getElementById('doctorContact').value,
+                language: document.querySelector('.language-option.selected').dataset.lang,
+                voiceType: document.querySelector('.voice-option.selected').dataset.voice,
+                volume: document.getElementById('volume').value,
+                speechSpeed: document.getElementById('speechSpeed').value,
+                autoDetectLanguage: document.getElementById('autoDetectLanguage').checked,
+                medicineReminders: document.getElementById('medicineReminders').checked,
+                healthReminders: document.getElementById('healthReminders').checked,
+                emergencyAlerts: document.getElementById('emergencyAlerts').checked,
+                whatsappNotifications: document.getElementById('whatsappNotifications').checked,
+                storeRecordings: document.getElementById('storeRecordings').checked,
+                dataAnalytics: document.getElementById('dataAnalytics').checked,
+                locationAccess: document.getElementById('locationAccess').checked
+            };
+
+            localStorage.setItem('voiceAssistantSettings', JSON.stringify(settings));
+            
+            // Show success message
+            showAlert('Settings saved successfully!', 'success');
+        }
+
+        function resetSettings() {
+            if (confirm('Are you sure you want to reset all settings to default?')) {
+                localStorage.removeItem('voiceAssistantSettings');
+                location.reload();
+            }
+        }
+
+        function clearAllData() {
+            if (confirm('Are you sure you want to clear all data? This cannot be undone.')) {
+                localStorage.clear();
+                showAlert('All data has been cleared!', 'info');
+                setTimeout(() => location.reload(), 2000);
+            }
+        }
+
+        function testVoice() {
+            const text = "Hello! This is a test of your voice assistant settings.";
+            const utterance = new SpeechSynthesisUtterance(text);
+            
+            const voiceType = document.querySelector('.voice-option.selected').dataset.voice;
+            const voices = speechSynthesis.getVoices();
+            
+            if (voiceType === 'male') {
+                utterance.voice = voices.find(voice => voice.name.includes('Male')) || voices[0];
+            } else {
+                utterance.voice = voices.find(voice => voice.name.includes('Female')) || voices[1];
+            }
+            
+            utterance.rate = parseFloat(document.getElementById('speechSpeed').value);
+            utterance.volume = parseFloat(document.getElementById('volume').value) / 100;
+            
+            speechSynthesis.speak(utterance);
+        }
+
+        function showAlert(message, type) {
+            const alert = document.createElement('div');
+            alert.className = alert alert-${type};
+            alert.textContent = message;
+            alert.style.position = 'fixed';
+            alert.style.top = '20px';
+            alert.style.right = '20px';
+            alert.style.zIndex = '9999';
+            document.body.appendChild(alert);
+            
+            setTimeout(() => {
+                alert.remove();
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

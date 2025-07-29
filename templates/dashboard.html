@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - AI Voice Assistant</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-icon {
+            font-size: 2em;
+            color: #667eea;
+        }
+
+        .header-text h1 {
+            color: #333;
+            font-size: 2em;
+            font-weight: 600;
+        }
+
+        .header-text p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-link {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-link:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .card-icon {
+            font-size: 1.8em;
+            color: #667eea;
+        }
+
+        .card-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .chat-history {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            background: #f8f9fa;
+        }
+
+        .chat-entry {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .chat-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .chat-input {
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .chat-response {
+            color: #555;
+            font-size: 0.95em;
+        }
+
+        .reminder-list {
+            max-height: 350px;
+            overflow-y: auto;
+        }
+
+        .reminder-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #28a745;
+        }
+
+        .reminder-info {
+            flex: 1;
+        }
+
+        .reminder-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .reminder-details {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .reminder-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .contact-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #ffc107;
+        }
+
+        .contact-info {
+            flex: 1;
+        }
+
+        .contact-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .contact-details {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .contact-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a67d8;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-info:hover {
+            background: #138496;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.9em;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .empty-state i {
+            font-size: 3em;
+            color: #ccc;
+            margin-bottom: 20px;
+        }
+
+        .analytics-chart {
+            height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .nav-links {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .card-header {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .reminder-item, .contact-item {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="header-title">
+                <div class="header-icon">
+                    <i class="fas fa-tachometer-alt"></i>
+                </div>
+                <div class="header-text">
+                    <h1>Dashboard</h1>
+                    <p>Monitor your health assistant activity</p>
+                </div>
+            </div>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">
+                    <i class="fas fa-microphone-alt"></i> Voice Assistant
+                </a>
+                <a href="settings.html" class="nav-link">
+                    <i class="fas fa-cog"></i> Settings
+                </a>
+                <a href="reminders.html" class="nav-link">
+                    <i class="fas fa-bell"></i> Reminders
+                </a>
+                <a href="history.html" class="nav-link">
+                    <i class="fas fa-history"></i> History
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number" id="totalQueries">0</div>
+            <div class="stat-label">Total Queries</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="todayQueries">0</div>
+            <div class="stat-label">Today's Queries</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="activeReminders">0</div>
+            <div class="stat-label">Active Reminders</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="emergencyAlerts">0</div>
+            <div class="stat-label">Emergency Alerts</div>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-header-left">
+                    <div class="card-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <div class="card-title">Recent Conversations</div>
+                </div>
+                <a href="history.html" class="btn btn-info btn-sm">
+                    <i class="fas fa-eye"></i> View All
+                </a>
+            </div>
+            <div class="chat-history" id="chatHistory">
+                <div class="chat-entry">
+                    <div class="chat-meta">
+                        <span><i class="fas fa-clock"></i> 10:30 AM</span>
+                        <span><i class="fas fa-language"></i> Tamil</span>
+                        <span><i class="fas fa-tag"></i> Health</span>
+                    </div>
+                    <div class="chat-input">
+                        <strong>You:</strong> எனக்கு தலைவலி இருக்கு
+                    </div>
+                    <div class="chat-response">
+                        <strong>Assistant:</strong> தலைவலிக்கு ஓய்வு எடுங்கள். போதுமான தண்ணீர் குடிங்கள்.
+                    </div>
+                </div>
+                <div class="chat-entry">
+                    <div class="chat-meta">
+                        <span><i class="fas fa-clock"></i> 09:15 AM</span>
+                        <span><i class="fas fa-language"></i> Hindi</span>
+                        <span><i class="fas fa-tag"></i> Medicine</span>
+                    </div>
+                    <div class="chat-input">
+                        <strong>You:</strong> मुझे दवा का समय याद दिलाना है
+                    </div>
+                    <div class="chat-response">
+                        <strong>Assistant:</strong> आपकी दवा का रिमाइंडर सेट कर दिया गया है।
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-header-left">
+                    <div class="card-icon">
+                        <i class="fas fa-pills"></i>
+                    </div>
+                    <div class="card-title">Medicine Reminders</div>
+                </div>
+                <a href="reminders.html" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus"></i> Add Reminder
+                </a>
+            </div>
+            <div class="reminder-list" id="reminderList">
+                <div class="reminder-item">
+                    <div class="reminder-info">
+                        <div class="reminder-name">Blood Pressure Medicine</div>
+                        <div class="reminder-details">
+                            1 tablet - twice daily at 08:00, 20:00
+                        </div>
+                    </div>
+                    <div class="reminder-actions">
+                        <button class="btn btn-success btn-sm">
+                            <i class="fas fa-check"></i> Taken
+                        </button>
+                        <button class="btn btn-warning btn-sm">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                    </div>
+                </div>
+                <div class="reminder-item">
+                    <div class="reminder-info">
+                        <div class="reminder-name">Diabetes Medicine</div>
+                        <div class="reminder-details">
+                            2 tablets - once daily at 09:00
+                        </div>
+                    </div>
+                    <div class="reminder-actions">
+                        <button class="btn btn-success btn-sm">
+                            <i class="fas fa-check"></i> Taken
+                        </button>
+                        <button class="btn btn-warning btn-sm">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-header-left">
+                    <div class="card-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="card-title">Usage Analytics</div>
+                </div>
+            </div>
+            <div class="analytics-chart">
+                <div class="empty-state">
+                    <i class="fas fa-chart-bar"></i>
+                    <p>Analytics chart will be displayed here</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-header-left">
+                    <div class="card-icon">
+                        <i class="fas fa-phone-alt"></i>
+                    </div>
+                    <div class="card-title">Emergency Contacts</div>
+                </div>
+                <a href="emergency.html" class="btn btn-warning btn-sm">
+                    <i class="fas fa-plus"></i> Add Contact
+                </a>
+            </div>
+            <div id="emergencyContacts">
+                <div class="contact-item">
+                    <div class="contact-info">
+                        <div class="contact-name">Dr. Rajesh Kumar</div>
+                        <div class="contact-details">
+                            Doctor - +91 9876543210
+                        </div>
+                    </div>
+                    <div class="contact-actions">
+                        <button class="btn btn-success btn-sm">
+                            <i class="fas fa-phone"></i> Call
+                        </button>
+                        <button class="btn btn-info btn-sm">
+                            <i class="fas fa-comment"></i> Message
+                        </button>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-info">
+                        <div class="contact-name">Priya Sharma</div>
+                        <div class="contact-details">
+                            Daughter - +91 9876543211
+                        </div>
+                    </div>
+                    <div class="contact-actions">
+                        <button class="btn btn-success btn-sm">
+                            <i class="fas fa-phone"></i> Call
+                        </button>
+                        <button class="btn btn-info btn-sm">
+                            <i class="fas fa-comment"></i> Message
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboardData();
+            updateStats();
+        });
+
+        function loadDashboardData() {
+            // Simulate loading data
+            updateStats();
+        }
+
+        function updateStats() {
+            // Mock data for demonstration
+            document.getElementById('totalQueries').textContent = '47';
+            document.getElementById('todayQueries').textContent = '8';
+            document.getElementById('activeReminders').textContent = '3';
+            document.getElementById('emergencyAlerts').textContent = '0';
+        }
+
+        // Add interactivity
+        document.querySelectorAll('.btn-success').forEach(button => {
+            if (button.textContent.includes('Taken')) {
+                button.addEventListener('click', function() {
+                    this.innerHTML = '<i class="fas fa-check-circle"></i> Completed';
+                    this.classList.remove('btn-success');
+                    this.classList.add('btn-info');
+                    this.disabled = true;
+                });
+            }
+        });
+
+        // Call and message functionality
+        document.querySelectorAll('.btn-success').forEach(button => {
+            if (button.textContent.includes('Call')) {
+                button.addEventListener('click', function() {
+                    const contact = this.closest('.contact-item').querySelector('.contact-name').textContent;
+                    alert(Calling ${contact}...);
+                });
+            }
+        });
+
+        document.querySelectorAll('.btn-info').forEach(button => {
+            if (button.textContent.includes('Message')) {
+                button.addEventListener('click', function() {
+                    const contact = this.closest('.contact-item').querySelector('.contact-name').textContent;
+                    alert(Sending message to ${contact}...);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
