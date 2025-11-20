@@ -5,7 +5,7 @@ import pyaudio
 from utils.emergency_alert import send_emergency_alert
 
 # Load the Whisper model once
-model = whisper.load_model("base")
+model = whisper.load_model("tiny")
 
 def record_audio(duration=5, filename="output.wav"):
     chunk = 1024
