@@ -1,0 +1,39 @@
+.env
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual envs and environment files
+venv/
+.env
+.env.*
+*.env
+
+# Models and large binary files
+models/
+*.h5
+*.hdf5
+*.pth
+*.pt
+*.joblib
+*.pkl
+
+# Audio and generated files
+*.mp3
+*.wav
+output.wav
+
+# Static uploads / temporary data
+uploads/
+data/
+*.csv
+
+# IDE and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
