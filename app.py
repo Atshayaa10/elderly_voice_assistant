@@ -180,11 +180,11 @@ def voice_input():
     try:
         data = request.json or {}
         text = (data.get("text") or "").strip()
-
+        location = data.get("location")
         print("[🗣️ USER SAID]", text)
 
         if is_emergency(text):
-            send_emergency_alert(text)
+            send_emergency_alert(text,location)
             return jsonify({"status": "🚨 Emergency alert sent!"})
 
         if text.lower().startswith("play "):
