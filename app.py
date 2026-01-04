@@ -1,4 +1,4 @@
-## app.py — SINGLE FILE, CLOUD-SAFE
+# app.py — SINGLE FILE, CLOUD-SAFE
 # Elderly Voice Assistant (Rule-Based, Voice-Based Emergency)
 
 import os
@@ -50,6 +50,8 @@ TWILIO_AVAILABLE = all([
 client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN) if TWILIO_AVAILABLE else None
 if TWILIO_AVAILABLE:
     print("🔔 Twilio client initialized")
+else:
+    print("⚠️ Twilio not fully configured")
 
 # ======================= TEXT TO SPEECH =======================
 engine = None
@@ -76,34 +78,40 @@ def is_emergency(text):
         return False
     return any(word in text.lower() for word in EMERGENCY_WORDS)
 
-# ======================= SEND ALERT =======================
+# ======================= SEND ALERT (SAFE) =======================
 def send_emergency_alert(msg, location=None):
     global _last_alert
 
     if not TWILIO_AVAILABLE:
+        print("[⚠️ TWILIO NOT AVAILABLE]")
         return
 
     if time.time() - _last_alert < ALERT_COOLDOWN:
         return
 
-    body = f"🚨 Emergency Alert 🚨\n{msg}"
-    if location:
-        body += f"\n📍 {location}"
+    try:
+        body = f"🚨 Emergency Alert 🚨\n{msg}"
+        if location:
+            body += f"\n📍 {location}"
 
-    client.messages.create(
-        body=body,
-        from_=TWILIO_NUMBER,
-        to=VERIFIED_NUMBER
-    )
+        client.messages.create(
+            body=body,
+            from_=TWILIO_NUMBER,
+            to=VERIFIED_NUMBER
+        )
 
-    client.calls.create(
-        from_=TWILIO_NUMBER,
-        to=VERIFIED_NUMBER,
-        twiml=f"<Response><Play>{VOICE_MP3_URL}</Play></Response>"
-    )
+        if VOICE_MP3_URL:
+            client.calls.create(
+                from_=TWILIO_NUMBER,
+                to=VERIFIED_NUMBER,
+                twiml=f"<Response><Play>{VOICE_MP3_URL}</Play></Response>"
+            )
 
-    _last_alert = time.time()
-    print("[✅ EMERGENCY ALERT SENT]")
+        _last_alert = time.time()
+        print("[✅ EMERGENCY ALERT SENT]")
+
+    except Exception as e:
+        print("[❌ TWILIO ERROR]", e)
 
 # ======================= RULE-BASED CHAT =======================
 def generate_ai_reply(text):
@@ -169,37 +177,41 @@ def index():
 
 @app.route("/voice_input", methods=["POST"])
 def voice_input():
-    data = request.json or {}
-    text = (data.get("text") or "").strip()
+    try:
+        data = request.json or {}
+        text = (data.get("text") or "").strip()
 
-    print("[🗣️ USER SAID]", text)
+        print("[🗣️ USER SAID]", text)
 
-    if is_emergency(text):
-        send_emergency_alert(text)
-        return jsonify({"status": "🚨 Emergency alert sent!"})
+        if is_emergency(text):
+            send_emergency_alert(text)
+            return jsonify({"status": "🚨 Emergency alert sent!"})
 
-    if text.lower().startswith("play "):
-        query = text[5:]
-        _, youtube_url = get_youtube_video(query)
-        if youtube_url:
-            return jsonify({
-                "status": f"🎵 Playing {query}",
-                "youtube_url": youtube_url
-            })
+        if text.lower().startswith("play "):
+            query = text[5:]
+            _, youtube_url = get_youtube_video(query)
+            if youtube_url:
+                return jsonify({
+                    "status": f"🎵 Playing {query}",
+                    "youtube_url": youtube_url
+                })
 
-    reply = generate_ai_reply(text)
+        reply = generate_ai_reply(text)
 
-    if engine:
-        engine.save_to_file(reply, OUTPUT_AUDIO)
-        engine.runAndWait()
+        if engine:
+            engine.save_to_file(reply, OUTPUT_AUDIO)
+            engine.runAndWait()
 
-    return jsonify({
-        "status": reply,
-        "reply_audio": None if IS_RENDER else OUTPUT_AUDIO
-    })
+        return jsonify({
+            "status": reply,
+            "reply_audio": None if IS_RENDER else OUTPUT_AUDIO
+        })
+
+    except Exception as e:
+        print("[❌ BACKEND ERROR]", e)
+        return jsonify({"status": "Backend error"}), 500
 
 # ======================= MAIN =======================
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
-
