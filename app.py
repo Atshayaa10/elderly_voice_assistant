@@ -1,4 +1,4 @@
-# app.py — SINGLE FILE, CLOUD-SAFE
+## app.py — SINGLE FILE, CLOUD-SAFE
 # Elderly Voice Assistant (Rule-Based, Voice-Based Emergency)
 
 import os
@@ -52,7 +52,6 @@ if TWILIO_AVAILABLE:
     print("🔔 Twilio client initialized")
 
 # ======================= TEXT TO SPEECH =======================
-# IMPORTANT: Disable pyttsx3 on Render to avoid crash
 engine = None
 if not IS_RENDER:
     import pyttsx3
@@ -70,7 +69,6 @@ EMERGENCY_WORDS = [
 ]
 
 _last_alert = 0
-latest_location_url = None
 
 # ======================= EMERGENCY CHECK =======================
 def is_emergency(text):
@@ -81,8 +79,10 @@ def is_emergency(text):
 # ======================= SEND ALERT =======================
 def send_emergency_alert(msg, location=None):
     global _last_alert
+
     if not TWILIO_AVAILABLE:
         return
+
     if time.time() - _last_alert < ALERT_COOLDOWN:
         return
 
@@ -90,7 +90,12 @@ def send_emergency_alert(msg, location=None):
     if location:
         body += f"\n📍 {location}"
 
-    client.messages.create(body=body, from_=TWILIO_NUMBER, to=VERIFIED_NUMBER)
+    client.messages.create(
+        body=body,
+        from_=TWILIO_NUMBER,
+        to=VERIFIED_NUMBER
+    )
+
     client.calls.create(
         from_=TWILIO_NUMBER,
         to=VERIFIED_NUMBER,
@@ -130,7 +135,7 @@ def generate_ai_reply(text):
     if "who are you" in text or "your name" in text:
         return "I am your Elderly Voice Assistant, always here to help you."
 
-    if any(p in text for ["medicine", "tablet", "pill"]):
+    if any(p in text for p in ["medicine", "tablet", "pill"]):
         return "Please remember to take your medicines on time."
 
     return random.choice([
@@ -184,7 +189,6 @@ def voice_input():
 
     reply = generate_ai_reply(text)
 
-    # 🔊 Generate audio ONLY if not Render
     if engine:
         engine.save_to_file(reply, OUTPUT_AUDIO)
         engine.runAndWait()
@@ -198,3 +202,4 @@ def voice_input():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
+
