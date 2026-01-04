@@ -119,18 +119,45 @@
     recognition.start();
   }
 
-  function sendToBackend(text) {
-    /* ✅ IMPORTANT FIX:
-       Use relative URL so it works on Render + localhost */
+  
+function sendToBackend(text) {
+
+    // 🔥 If emergency, fetch live location first
+    const emergencyWords = ["help", "emergency", "save me", "danger", "rescue"];
+
+    const isEmergency = emergencyWords.some(w =>
+      text.toLowerCase().includes(w)
+    );
+
+    if (isEmergency && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        pos => {
+          const lat = pos.coords.latitude;
+          const lon = pos.coords.longitude;
+          const locationUrl = `https://maps.google.com/?q=${lat},${lon}`;
+
+          sendRequest(text, locationUrl);
+        },
+        () => {
+          // Location denied or error
+          sendRequest(text, null);
+        }
+      );
+    } else {
+      sendRequest(text, null);
+    }
+  }
+
+  function sendRequest(text, location) {
     fetch("/voice_input", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text })
+      body: JSON.stringify({
+        text: text,
+        location: location
+      })
     })
-    .then(res => {
-      if (!res.ok) throw new Error("Server error");
-      return res.json();
-    })
+    .then(res => res.json())
     .then(data => {
 
       if (data.status) {
@@ -139,7 +166,6 @@
         speak(data.status);
       }
 
-      /* 🔥 FINAL LOGIC — SAME TAB AUTO PLAY */
       if (data.youtube_url) {
         setStatus("🎵 Opening YouTube...", "success");
         window.location.href = data.youtube_url;
@@ -148,10 +174,7 @@
       }
 
     })
-    .catch(err => {
-      console.error("Backend error:", err);
-      setStatus("❌ Backend error", "error");
-    });
+    .catch(() => setStatus("❌ Backend error", "error"));
   }
 </script>
 
