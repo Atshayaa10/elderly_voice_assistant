@@ -120,12 +120,17 @@
   }
 
   function sendToBackend(text) {
-    fetch("http://127.0.0.1:5000/voice_input", {
+    /* ✅ IMPORTANT FIX:
+       Use relative URL so it works on Render + localhost */
+    fetch("/voice_input", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text })
     })
-    .then(res => res.json())
+    .then(res => {
+      if (!res.ok) throw new Error("Server error");
+      return res.json();
+    })
     .then(data => {
 
       if (data.status) {
@@ -143,7 +148,10 @@
       }
 
     })
-    .catch(() => setStatus("❌ Backend error", "error"));
+    .catch(err => {
+      console.error("Backend error:", err);
+      setStatus("❌ Backend error", "error");
+    });
   }
 </script>
 
