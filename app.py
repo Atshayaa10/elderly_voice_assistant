@@ -1,5 +1,6 @@
-# app.py — SINGLE FILE, CLOUD-SAFE
-# Elderly Voice Assistant (Rule-Based, Voice-Based Emergency)
+# ======================= app.py =======================
+# Elderly Voice Assistant – Rule Based + Emergency + YouTube Play
+# Cloud-safe (Render compatible)
 
 import os
 import time
@@ -24,7 +25,6 @@ CORS(app)
 os.makedirs("static", exist_ok=True)
 OUTPUT_AUDIO = "static/output.wav"
 
-# Detect Render environment
 IS_RENDER = os.getenv("RENDER") == "true"
 
 # ======================= CONFIG =======================
@@ -48,19 +48,12 @@ TWILIO_AVAILABLE = all([
 ])
 
 client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN) if TWILIO_AVAILABLE else None
-if TWILIO_AVAILABLE:
-    print("🔔 Twilio client initialized")
-else:
-    print("⚠️ Twilio not fully configured")
 
-# ======================= TEXT TO SPEECH =======================
+# ======================= TEXT TO SPEECH (LOCAL ONLY) =======================
 engine = None
 if not IS_RENDER:
     import pyttsx3
     engine = pyttsx3.init()
-    print("🔊 pyttsx3 enabled (local)")
-else:
-    print("🔇 pyttsx3 disabled on Render")
 
 # ======================= EMERGENCY KEYWORDS =======================
 EMERGENCY_WORDS = [
@@ -72,89 +65,64 @@ EMERGENCY_WORDS = [
 
 _last_alert = 0
 
-# ======================= EMERGENCY CHECK =======================
 def is_emergency(text):
-    if not text:
-        return False
     return any(word in text.lower() for word in EMERGENCY_WORDS)
 
-# ======================= SEND ALERT (SAFE) =======================
+# ======================= SEND EMERGENCY ALERT =======================
 def send_emergency_alert(msg, location=None):
     global _last_alert
 
     if not TWILIO_AVAILABLE:
-        print("[⚠️ TWILIO NOT AVAILABLE]")
         return
 
     if time.time() - _last_alert < ALERT_COOLDOWN:
         return
 
-    try:
-        body = f"🚨 Emergency Alert 🚨\n{msg}"
-        if location:
-            body += f"\n📍 {location}"
+    body = f"🚨 Emergency Alert 🚨\n{msg}"
+    if location:
+        body += f"\n📍 Location: {location}"
 
-        client.messages.create(
-            body=body,
+    client.messages.create(
+        body=body,
+        from_=TWILIO_NUMBER,
+        to=VERIFIED_NUMBER
+    )
+
+    if VOICE_MP3_URL:
+        client.calls.create(
             from_=TWILIO_NUMBER,
-            to=VERIFIED_NUMBER
+            to=VERIFIED_NUMBER,
+            twiml=f"<Response><Play>{VOICE_MP3_URL}</Play></Response>"
         )
 
-        if VOICE_MP3_URL:
-            client.calls.create(
-                from_=TWILIO_NUMBER,
-                to=VERIFIED_NUMBER,
-                twiml=f"<Response><Play>{VOICE_MP3_URL}</Play></Response>"
-            )
+    _last_alert = time.time()
 
-        _last_alert = time.time()
-        print("[✅ EMERGENCY ALERT SENT]")
-
-    except Exception as e:
-        print("[❌ TWILIO ERROR]", e)
-
-# ======================= RULE-BASED CHAT =======================
-def generate_ai_reply(text):
-    if not text:
-        return "I am here with you."
-
-    text = text.lower()
-    text = re.sub(r"[^\w\s]", "", text).strip()
+# ======================= RULE BASED CHAT =======================
+def generate_reply(text):
+    text = re.sub(r"[^\w\s]", "", text.lower())
     now = datetime.now()
 
     if "good morning" in text:
-        return "Good morning. I hope you have a peaceful day."
-    if "good afternoon" in text:
-        return "Good afternoon. I am here to help you."
+        return "Good morning. I hope you are feeling well."
     if "good evening" in text:
-        return "Good evening. I am with you."
-    if "good night" in text:
-        return "Good night. Sleep well and stay safe."
-
-    if any(p in text for p in ["time now", "what is the time", "current time"]):
+        return "Good evening. I am here with you."
+    if "time" in text:
         return f"The time is {now.strftime('%I:%M %p')}."
-
-    if any(p in text for p in ["day today", "what day"]):
+    if "day" in text:
         return f"Today is {now.strftime('%A')}."
-
     if "date" in text:
         return f"Today's date is {now.strftime('%d %B %Y')}."
-
-    if "who are you" in text or "your name" in text:
-        return "I am your Elderly Voice Assistant, always here to help you."
-
-    if any(p in text for p in ["medicine", "tablet", "pill"]):
-        return "Please remember to take your medicines on time."
+    if "medicine" in text or "tablet" in text or "pill" in text:
+        return "Please remember to take your medicine on time."
 
     return random.choice([
         "I am listening.",
         "Please tell me how I can help you.",
-        "You can say emergency if you need help.",
         "I am here with you."
     ])
 
-# ======================= YOUTUBE =======================
-def get_youtube_video(query):
+# ======================= YOUTUBE FETCH =======================
+def get_youtube_url(query):
     try:
         ydl_opts = {
             "quiet": True,
@@ -163,12 +131,10 @@ def get_youtube_video(query):
         }
         with YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(query, download=False)
-            video = info["entries"][0]
-            video_id = video.get("id")
-            return video_id, f"https://www.youtube.com/watch?v={video_id}"
-    except Exception as e:
-        print("[❌ YOUTUBE ERROR]", e)
-        return None, None
+            video_id = info["entries"][0]["id"]
+            return f"https://www.youtube.com/watch?v={video_id}"
+    except:
+        return None
 
 # ======================= ROUTES =======================
 @app.route("/")
@@ -181,22 +147,26 @@ def voice_input():
         data = request.json or {}
         text = (data.get("text") or "").strip()
         location = data.get("location")
-        print("[🗣️ USER SAID]", text)
 
-        if is_emergency(text):
-            send_emergency_alert(text,location)
-            return jsonify({"status": "🚨 Emergency alert sent!"})
-
+        # 🔥 PLAY COMMAND — MUST BE FIRST
         if text.lower().startswith("play "):
             query = text[5:]
-            _, youtube_url = get_youtube_video(query)
+            youtube_url = get_youtube_url(query)
             if youtube_url:
                 return jsonify({
                     "status": f"🎵 Playing {query}",
                     "youtube_url": youtube_url
                 })
 
-        reply = generate_ai_reply(text)
+        # 🚨 EMERGENCY
+        if is_emergency(text):
+            send_emergency_alert(text, location)
+            return jsonify({
+                "status": "🚨 Emergency alert sent. Help is on the way."
+            })
+
+        # 💬 RULE BASED RESPONSE
+        reply = generate_reply(text)
 
         if engine:
             engine.save_to_file(reply, OUTPUT_AUDIO)
@@ -208,7 +178,7 @@ def voice_input():
         })
 
     except Exception as e:
-        print("[❌ BACKEND ERROR]", e)
+        print("BACKEND ERROR:", e)
         return jsonify({"status": "Backend error"}), 500
 
 # ======================= MAIN =======================
